@@ -1,0 +1,30 @@
+name: voiceover
+on:
+  workflow_dispatch:
+    inputs:
+      language:
+        description: "en (English) or ur (Urdu)"
+        default: "en"
+      voice:
+        description: "Voice name (leave empty for the default)"
+        default: ""
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          sudo apt-get update && sudo apt-get install -y ffmpeg
+          pip install edge-tts
+      - name: Make the voiceover video
+        run: python make_voiceover.py --lang "${{ github.event.inputs.language }}" --voice "${{ github.event.inputs.voice }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: promo-with-voice
+          path: out/*.mp4
